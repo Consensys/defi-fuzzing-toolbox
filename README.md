@@ -19,22 +19,23 @@ npm install <TODO AFTER RELEASING PACKAGE>
 
 # Usage
 
-Lets say for example you want to get a local deployment with WETH, DAI and UniswapV2 and swap 10 WETH for DAI. You can do this as follows:
+Say you want to get a local deployment with WETH, DAI and UniswapV2 and swap 10 WETH for DAI. You can do this as follows:
 
-1. Fire up ganache:
+1. Fire up ganache. Note that the `--chain.allowUnlimitedContractSize` is needed tor the deployment of UniswapV2 (runs out of gas with the default ganache config).
 
 ```sh
 ganache -p 8545 --chain.allowUnlimitedContractSize
 ```
 
-And from another terminal fire up nodejs and try the following:
+And from another terminal fire up Node and try the following:
 
 ```js
 // Get an instance of the DefiToolbox. The toolbox is connected to the local ganache instance.
 const { DefiToolbox } = require(".");
 const tb = new DefiToolbox("http://localhost:8545");
 
-// Get an instance of WETH. Note that this automatically deploys the contract to the local ganache instance on the first invocation. 
+// Get an instance of WETH. Note that this automatically deploys the contract to the local
+// ganache instance on the first invocation. 
 const weth = await tb.weth();
 // weth is an instance of TruffleContract.
 
@@ -45,16 +46,19 @@ const sender = await tb.firstAccount();
 await weth.deposit({value: 1000000, from: sender });
 
 
-// Get an instance of DAI. Note that we pass sender to the DAI constructor, so that sender is authorized to mint
+// Get an instance of DAI. Note that we pass sender to the DAI constructor, so that sender
+// is authorized to mint
 const dai = await tb.dai(sender);
 
 // Mint some dai to sender
 await dai.mint(sender, 100000, { from: sender })
 
-// Now get the UniswapV2 router. Note all deployment helpers have an implicit "sender" argument, that is the first account by default.
+// Now get the UniswapV2 router. Note all deployment helpers have an implicit "sender"
+// argument, that is the first account by default.
 const router = await tb.uniswapV2Router();
 
-// Now give the WETH/DAI pair some initial liquidity. The "2000000000" is some arbitrary deadline the future.
+// Now give the WETH/DAI pair some initial liquidity.
+// The "2000000000" is some arbitrary deadline the future.
 await dai.approve(router.address, 10000, { from: sender });
 await weth.approve(router.address, 10000, { from: sender });
 await router.addLiquidity(weth.address, dai.address, 10000, 10000, 0, 0, sender, 2000000000, { from: sender })
