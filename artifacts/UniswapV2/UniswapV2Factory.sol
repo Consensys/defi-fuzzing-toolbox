@@ -402,7 +402,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
-    event PairCreated(address indexed token0, address indexed token1, address pair, uint);
+    event PairCreated(address indexed token0, address indexed token1, address pair, uint, bytes32 bytecodeHash);
 
     constructor(address _feeToSetter) public {
         feeToSetter = _feeToSetter;
@@ -426,7 +426,8 @@ contract UniswapV2Factory is IUniswapV2Factory {
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
-        emit PairCreated(token0, token1, pair, allPairs.length);
+        bytes32 bytecodeHash = keccak256(bytecode);
+        emit PairCreated(token0, token1, pair, allPairs.length, bytecodeHash);
     }
 
     function setFeeTo(address _feeTo) external {

@@ -15,7 +15,6 @@ describe("Deploy all artifacts", async () => {
     let usdc: TruffleContractT;
     let deployer: AddressLike;
     let clipper: TruffleContractT;
-    let uniswapV2WETHDAIPair: TruffleContractT;
     let uniswapV2Router: TruffleContractT;
 
     before(async () => {
@@ -75,10 +74,9 @@ describe("Deploy all artifacts", async () => {
 
     it("Deploy Uniswap and some swaps", async () => {
         uniswapV2Router = await toolbox.uniswapV2Router();
-        uniswapV2WETHDAIPair = await toolbox.uniswapV2Pair(weth, dai);
 
-        const wethLiqidity = 10;
-        const daiLiquidity = 10;
+        const wethLiqidity = 100000;
+        const daiLiquidity = 100000;
         await weth.approve(uniswapV2Router.address, wethLiqidity.toString(), { from: deployer });
         await dai.approve(uniswapV2Router.address, daiLiquidity.toString(), { from: deployer });
 
@@ -96,27 +94,27 @@ describe("Deploy all artifacts", async () => {
             }
         );
 
-        await weth.approve(uniswapV2WETHDAIPair.address, 100000000, { from: deployer });
+        const wethBefore = BigInt((await weth.balanceOf(deployer)).toString());
+        const daiBefore = BigInt((await dai.balanceOf(deployer)).toString());
 
-        const daiBalance = await dai.balanceOf(uniswapV2WETHDAIPair.address);
-        const wethBalance = await weth.balanceOf(uniswapV2WETHDAIPair.address);
-        const reserves = await uniswapV2WETHDAIPair.getReserves();
-        console.error(`Reserves: ${JSON.stringify(reserves)}`);
-        console.error(`daiBalance: ${daiBalance} wethBalance: ${wethBalance}`);
-
-        /*
-        const wethBefore = await weth.balanceOf(deployer).toString();
-        const daiBefore = await dai.balanceOf(deployer).toString();
-
-        await uniswapV2WETHDAIPair.swap(1, 1, deployer, "0x", { from: deployer });
-
-        const wethAfter = await weth.balanceOf(deployer).toString();
-        const daiAfter = await dai.balanceOf(deployer).toString();
-
-        console.error(
-            `Weth before: ${wethBefore} after: ${wethAfter}. Dai before ${daiBefore} after ${daiAfter}`
+        await weth.approve(uniswapV2Router.address, 10, { from: deployer });
+        const transfer = 10;
+        await uniswapV2Router.swapExactTokensForTokens(
+            transfer.toString(),
+            "0",
+            [weth.address, dai.address],
+            deployer,
+            2000000000,
+            {
+                from: deployer
+            }
         );
-        */
+
+        const wethAfter = BigInt((await weth.balanceOf(deployer)).toString());
+        const daiAfter = BigInt((await dai.balanceOf(deployer)).toString());
+
+        expect(wethBefore - wethAfter === BigInt(transfer)).to.be.true;
+        expect(daiAfter > daiBefore).to.be.true;
     });
 
     after(() => {
