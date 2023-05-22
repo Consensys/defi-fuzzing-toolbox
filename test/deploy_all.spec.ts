@@ -30,9 +30,13 @@ describe("Deploy all artifacts", async () => {
             "--chain.allowUnlimitedContractSize"
         ]);
 
+        ganacheProc.on("error", (data) => {
+            console.error(`Failed starting/running ganache: `, data);
+        });
+
         await timer(2000);
 
-        toolbox = new DefiToolbox(`http://localhost:${PORT}`);
+        toolbox = new DefiToolbox(`http://127.0.0.1:${PORT}`);
     });
 
     it("Get deployer", async () => {
