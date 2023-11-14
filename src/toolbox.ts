@@ -8,11 +8,20 @@ import { HttpProvider, IpcProvider, WebsocketProvider } from "web3-core";
 type Web3Provider = HttpProvider | WebsocketProvider | IpcProvider | string;
 export type TruffleContractT = typeof TruffleContract;
 export type AddressLike = TruffleContractT | string;
+export type NumberLike = number | bigint | string;
 
 const ARTIFACTS_PATH = join(dirname(__dirname), "artifacts");
 
 function addressOf(arg: AddressLike): string {
     return typeof arg === "string" ? arg : arg.address;
+}
+
+function toNumStr(arg: NumberLike): string {
+    if (typeof arg === "number" || typeof arg === "bigint") {
+        return arg.toString();
+    } else {
+        return arg;
+    }
 }
 
 export class DefiToolbox {
@@ -22,7 +31,7 @@ export class DefiToolbox {
         this.web3 = new Web3(provider);
     }
 
-    private getTruffleContractFactory(
+    public getTruffleContractFactory(
         jsonFileName: string,
         mainSolFileName: string,
         contractName: string
@@ -70,19 +79,13 @@ export class DefiToolbox {
 
     public async giveWethTo(
         receiver: AddressLike,
-        amount: number | string | bigint,
+        amount: NumberLike,
         senderArg?: AddressLike
     ): Promise<void> {
         const weth = await this.weth();
-        let strAmount: string;
-
-        if (typeof amount === "number" || typeof amount === "bigint") {
-            strAmount = amount.toString();
-        } else {
-            strAmount = amount;
-        }
-
         const from = await this.getSender(senderArg);
+        const strAmount = toNumStr(amount);
+
         await weth.deposit({ value: strAmount, from });
         await weth.transfer(addressOf(receiver), strAmount, { from });
     }
@@ -266,4 +269,27 @@ export class DefiToolbox {
 
         return uniswapV2Pair.at(pairEmittedEvent[0].args.pair);
     }
+
+    public async ierc20At(addr: AddressLike): Promise<TruffleContractT> {
+        const IERC20 = await this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/ERC20/MintableERC20.json`,
+            `@openzeppelin/contracts/token/ERC20/IERC20.sol`,
+            "IERC20"
+        );
+        return IERC20.at(addressOf(addr));
+    }
+
+    /*
+    public async uniswapV2PairGrantLiquidity(
+        token0: AddressLike,
+        token1: AddressLike,
+        token0Liquidity: NumberLike,
+        token1Liquidity: NumberLike
+    ): Promise<void> {
+        const erc20_0 = await this.ierc20At(token0);
+        const erc20_1 = await this.ierc20At(token0);
+
+        const router = await this.uniswapV2Router();
+    }
+    */
 }

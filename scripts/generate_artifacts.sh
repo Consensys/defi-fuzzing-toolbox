@@ -22,3 +22,6 @@ sol-ast-compile --compiler-version 0.5.16 --compiler-kind native --raw artifacts
 
 echo "Generating artifacts/UniswapV2/UniswapV2Router02.json";
 sol-ast-compile --compiler-version 0.6.6 --compiler-kind native --raw artifacts/UniswapV2/UniswapV2Router02.sol > artifacts/UniswapV2/UniswapV2Router02.json
+
+echo "Generating artifacts/ERC20/MintableERC20.json";
+sol-ast-compile --compiler-version 0.8.15 --compiler-kind native --raw artifacts/ERC20/MintableERC20.sol > artifacts/ERC20/MintableERC20.json
