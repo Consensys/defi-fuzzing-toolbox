@@ -12,7 +12,7 @@
         "clean": "rm -rf dist/",
         "transpile": "tsc",
 	"cp-artifacts": "cp -r src/artifacts/ dist/",
-        "build": "npm run clean && npm run transpile",
+        "build": "npm run clean && npm run transpile && npm run cp-artifacts",
         "lint": "eslint src/ test/ --ext=ts",
         "lint:fix": "eslint src/ test/ --ext=ts --fix",
         "prepare": "npm run build",
