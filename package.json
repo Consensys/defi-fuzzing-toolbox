@@ -11,10 +11,12 @@
     "scripts": {
         "clean": "rm -rf dist/",
         "transpile": "tsc",
+	"cp-artifacts": "cp -r src/artifacts/ dist/",
         "build": "npm run clean && npm run transpile",
         "lint": "eslint src/ test/ --ext=ts",
         "lint:fix": "eslint src/ test/ --ext=ts --fix",
-        "prepare": "npm run build"
+        "prepare": "npm run build",
+	"test": "npx mocha"
     },
     "dependencies": {
         "@truffle/contract": "^4.6.1",

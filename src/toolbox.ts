@@ -2,7 +2,7 @@ const TruffleContract = require("@truffle/contract");
 const fse = require("fs-extra");
 
 const Web3 = require("web3");
-import { dirname, join } from "path";
+import { join } from "path";
 import { HttpProvider, IpcProvider, WebsocketProvider } from "web3-core";
 
 type Web3Provider = HttpProvider | WebsocketProvider | IpcProvider | string;
@@ -10,7 +10,7 @@ export type TruffleContractT = typeof TruffleContract;
 export type AddressLike = TruffleContractT | string;
 export type NumberLike = number | bigint | string;
 
-const ARTIFACTS_PATH = join(dirname(__dirname), "artifacts");
+const ARTIFACTS_PATH = join(__dirname, "artifacts");
 
 function addressOf(arg: AddressLike): string {
     return typeof arg === "string" ? arg : arg.address;
