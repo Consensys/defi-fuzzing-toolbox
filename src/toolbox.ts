@@ -58,20 +58,24 @@ export class DefiToolbox {
         return deployerArg ? addressOf(deployerArg) : await this.firstAccount();
     }
 
+    public async wethContract(): Promise<TruffleContractT> {
+        return await this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/weth/WETH9.json`,
+            `artifacts/weth/WETH9.sol`,
+            "WETH9"
+        );
+    }
+
     /**
      * Return an instance of the weth contract (as obtained from etherscan.)
      * Deploy the contract if its not deployed already.
      */
     public async weth(deployerArg?: AddressLike): Promise<TruffleContractT> {
         if (!this._weth) {
-            const weth = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/weth/WETH9.json`,
-                `artifacts/weth/WETH9.sol`,
-                "WETH9"
-            );
+            const wethFactory = await this.wethContract();
 
             const deployer = await this.getSender(deployerArg);
-            this._weth = await weth.new({ from: deployer });
+            this._weth = await wethFactory.new({ from: deployer });
         }
 
         return this._weth;
@@ -92,17 +96,21 @@ export class DefiToolbox {
 
     private _dai: TruffleContractT | undefined;
 
+    public async daiContract(): Promise<TruffleContractT> {
+        return await this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/dai/DAI.json`,
+            `artifacts/dai/DAI.sol`,
+            "Dai"
+        );
+    }
+
     /**
      * Return an instance of the DAI contract (as obtained from etherscan.)
      * Deploy the contract if its not deployed already.
      */
     public async dai(deployerArg?: AddressLike): Promise<TruffleContractT> {
         if (!this._dai) {
-            const DAI = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/dai/DAI.json`,
-                `artifacts/dai/DAI.sol`,
-                "Dai"
-            );
+            const DAI = await this.daiContract();
 
             const from = await this.getSender(deployerArg);
             this._dai = await DAI.new(await this.getChainId(), { from });
@@ -112,17 +120,22 @@ export class DefiToolbox {
     }
 
     private _usdc: TruffleContractT | undefined;
+
+    public async usdcContract(): Promise<TruffleContractT> {
+        return await this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/usdc/USDC.json`,
+            `artifacts/usdc/USDC.sol`,
+            "USDC"
+        );
+    }
+
     /**
      * Return an instance of the usdc contract (we use an OZ ERC20 as a mock.)
      * Deploy the contract if its not deployed already.
      */
     public async usdc(deployerArg?: AddressLike): Promise<TruffleContractT> {
         if (!this._usdc) {
-            const usdc = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/usdc/USDC.json`,
-                `artifacts/usdc/USDC.sol`,
-                "USDC"
-            );
+            const usdc = await this.usdcContract();
 
             const from = await this.getSender(deployerArg);
             this._usdc = await usdc.new({ from });
@@ -142,6 +155,15 @@ export class DefiToolbox {
     }
 
     private _clipperExchange: TruffleContractT | undefined;
+
+    public async clipperExchangeContract(): Promise<TruffleContractT> {
+        return this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/ClipperExchange/ClipperExchange.json`,
+            `contracts/ClipperCaravelExchange.sol`,
+            "ClipperCaravelExchange"
+        );
+    }
+
     /**
      * Return an instance of the ClipperExchange contract (as obtained from etherscan)
      * Deploy the contract if its not deployed already.
@@ -168,11 +190,7 @@ export class DefiToolbox {
                 tokens = tokensArg.map((token) => token.address);
             }
 
-            const clipperExchange = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/ClipperExchange/ClipperExchange.json`,
-                `contracts/ClipperCaravelExchange.sol`,
-                "ClipperCaravelExchange"
-            );
+            const clipperExchange = await this.clipperExchangeContract();
 
             const from = await this.getSender(deployerArg);
             this._clipperExchange = await clipperExchange.new(signer, weth.address, tokens, {
@@ -185,17 +203,21 @@ export class DefiToolbox {
 
     private _uniswapV2Factory: TruffleContractT | undefined;
 
+    public async uniswapV2FactoryContract(): Promise<TruffleContractT> {
+        return this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Factory.json`,
+            `artifacts/UniswapV2/UniswapV2Factory.sol`,
+            "UniswapV2Factory"
+        );
+    }
+
     public async uniswapV2Factory(
         feeToSetterArg?: string,
         deployerArg?: AddressLike
     ): Promise<TruffleContractT> {
         if (!this._uniswapV2Factory) {
             const feeToSetter = feeToSetterArg ? feeToSetterArg : await this.firstAccount();
-            const UniswapV2Factory = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Factory.json`,
-                `artifacts/UniswapV2/UniswapV2Factory.sol`,
-                "UniswapV2Factory"
-            );
+            const UniswapV2Factory = await this.uniswapV2FactoryContract();
 
             const from = await this.getSender(deployerArg);
             this._uniswapV2Factory = await UniswapV2Factory.new(feeToSetter, { from });
@@ -206,13 +228,17 @@ export class DefiToolbox {
 
     private _uniswapV2Router: TruffleContractT | undefined;
 
+    public async uniswapV2RouterContract(): Promise<TruffleContractT> {
+        return this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Router02.json`,
+            `artifacts/UniswapV2/UniswapV2Router02.sol`,
+            "UniswapV2Router02"
+        );
+    }
+
     public async uniswapV2Router(deployerArg?: AddressLike): Promise<TruffleContractT> {
         if (!this._uniswapV2Router) {
-            const UniswapV2Router = await this.getTruffleContractFactory(
-                `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Router02.json`,
-                `artifacts/UniswapV2/UniswapV2Router02.sol`,
-                "UniswapV2Router02"
-            );
+            const UniswapV2Router = await this.uniswapV2RouterContract();
 
             const from = await this.getSender(deployerArg);
             const weth = await this.weth(deployerArg);
@@ -227,6 +253,14 @@ export class DefiToolbox {
     }
 
     private readonly _uniswapPairMap = new Map<string, TruffleContractT>();
+
+    public async uniswapV2PairContract(): Promise<TruffleContractT> {
+        return this.getTruffleContractFactory(
+            `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Pair.json`,
+            `artifacts/UniswapV2/UniswapV2Pair.sol`,
+            "UniswapV2Pair"
+        );
+    }
 
     public async uniswapV2Pair(
         token0: AddressLike,
@@ -261,12 +295,7 @@ export class DefiToolbox {
             (evt: any) => evt.event === "PairCreated"
         );
 
-        const uniswapV2Pair = await this.getTruffleContractFactory(
-            `${ARTIFACTS_PATH}/UniswapV2/UniswapV2Pair.json`,
-            `artifacts/UniswapV2/UniswapV2Pair.sol`,
-            "UniswapV2Pair"
-        );
-
+        const uniswapV2Pair = await this.uniswapV2PairContract();
         return uniswapV2Pair.at(pairEmittedEvent[0].args.pair);
     }
 
